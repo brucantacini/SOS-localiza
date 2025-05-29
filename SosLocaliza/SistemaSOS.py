@@ -3,6 +3,7 @@ import json
 import requests
 import oracledb
 
+
 def previsao_chuva(cidade):
     api_key = "82dc917aa83b073b74ba1298d6906b63"
     url = f"https://api.openweathermap.org/data/2.5/weather?q={cidade}&appid={api_key}&lang=pt_br&units=metric"
@@ -20,31 +21,31 @@ def previsao_chuva(cidade):
         print(f"Clima atual: {descricao.capitalize()}")
 
         if clima == "rain" or chuva >= 2:
-            print("Hoje há previsão de fortes chuvas. Fique em casa e tome cuidado ao sair na rua.")
-            print()
+            print("Hoje há previsão de fortes chuvas. Fique em casa e tome cuidado ao sair na rua.\n")
         else:
-            print("Sem previsão de fortes chuvas por enquanto.")
-            print()
+            print("Sem previsão de fortes chuvas por enquanto.\n")
     else:
-        print(f"Erro ao obter dados do clima para {cidade}.")
+        print(f"Erro ao obter dados do clima para {cidade}.\n")
+
 
 def localizacao_atual():
     permissao = input("Você deseja permitir o uso de sua localização atual? (SIM|NAO): ").lower().strip()
     if permissao == 'sim':
-        print("Acesso permitido, em caso de extremo risco, localização será enviada à defesa civil.")
-        print()
+        print("Acesso permitido, em caso de extremo risco, localização será enviada à defesa civil.\n")
     else:
-        print("Acesso negado.")
-        print()
+        print("Acesso negado.\n")
+
 
 def cadastrar_localizacao():
     try:
         print("----- CADASTRAR ENDEREÇO -----\n")
 
-        NOME_LOCAL = input("Nome do local (ex: CASA | TRABALHO): ")
-        RUA_LOCAL = input("Rua: ")
+        NOME_LOCAL = input("Nome do local (ex: CASA | TRABALHO): ").strip()
+        RUA_LOCAL = input("Rua: ").strip()
         NUMERO_LOCAL = int(input("Número: "))
-        CEP_LOCAL = int(input("CEP (OPCIONAL): "))
+        CEP_LOCAL = input("CEP (OPCIONAL - deixe vazio se não quiser): ").strip()
+        # CEP pode ser vazio, então tratar para None ou int
+        CEP_LOCAL = int(CEP_LOCAL) if CEP_LOCAL else None
 
         script = """INSERT INTO T_SOS_LOCALIZACAO 
                     (NOME_LOCAL, RUA_LOCAL, NUMERO_LOCAL, CEP_LOCAL) 
@@ -53,29 +54,30 @@ def cadastrar_localizacao():
         cursor.execute(script, (NOME_LOCAL, RUA_LOCAL, NUMERO_LOCAL, CEP_LOCAL))
         conn.commit()
 
-        print("\nLocalização registrada com sucesso.")
-        print()
+        print("\nLocalização registrada com sucesso.\n")
     except ValueError:
-        print("O Número da casa deve ser um número inteiro!")
+        print("O Número da casa deve ser um número inteiro!\n")
     except Exception as error:
-        print(f"Erro na transação com o banco de dados: {error}")
+        print(f"Erro na transação com o banco de dados: {error}\n")
+
 
 def exibir_localizacoes():
     try:
-        print("----- MINHAS LOCALIZAÇÕES-----\n")
+        print("----- MINHAS LOCALIZAÇÕES -----\n")
 
-        script = f"""SELECT * FROM T_SOS_LOCALIZACAO ORDER BY ID_LOCAL"""
+        script = "SELECT ID_LOCAL, NOME_LOCAL, RUA_LOCAL, NUMERO_LOCAL, CEP_LOCAL FROM T_SOS_LOCALIZACAO ORDER BY ID_LOCAL"
         cursor.execute(script)
         lista_dados = cursor.fetchall()
 
         if len(lista_dados) == 0:
-            print(f"Não há dados cadastrados!")
+            print("Não há dados cadastrados!\n")
         else:
             for item in lista_dados:
-                print(item)
-                print()
+                print(f"ID: {item[0]}, Nome: {item[1]}, Rua: {item[2]}, Número: {item[3]}, CEP: {item[4]}")
+            print()
     except Exception as error:
-         print(f"Erro na transação com o banco de dados: {error}")
+        print(f"Erro na transação com o banco de dados: {error}\n")
+
 
 def exibir_orientacoes():
     try:
@@ -99,10 +101,10 @@ def exibir_orientacoes():
             else:
                 nome_evento, descricao, prevencao, durante, apos = dados
                 print(f"\n Evento: {nome_evento}")
-                print(f"\n Descrição:\n{descricao}")
-                print(f"\n Antes do evento:\n{prevencao}")
-                print(f"\n Durante o evento:\n{durante}")
-                print(f"\n Após o evento:\n{apos}")
+                print(f"\n Descrição:\n{ descricao}")
+                print(f"\n Antes do evento:\n {prevencao}")
+                print(f"\n Durante o evento:\n {durante}")
+                print(f"\n Após o evento:\n {apos}")
                 print()
         else:
             print("Escolha um evento válido!")
@@ -117,7 +119,7 @@ def enviar_sms():
         MENSAGEM = input("Mensagem: ")
         DATA_ENVIO = datetime.date.today()
 
-        script = """INSERT INTO T_SOS_SMS_ENVIADO 
+        script = """INSERT INTO T_SOS_SMS
                     (MENSAGEM, DATA_ENVIO) 
                     VALUES (:1, :2)"""
 
@@ -131,43 +133,46 @@ def enviar_sms():
 
 def buscar_local_por_nome():
     try:
-        nome = input("Digite o nome do local (ex: CASA, TRABALHO): ").upper().strip()
+        nome = input("Digite o nome do local (ex: CASA, TRABALHO): ").strip()
         script = "SELECT * FROM T_SOS_LOCALIZACAO WHERE UPPER(NOME_LOCAL) = UPPER(:1)"
         cursor.execute(script, (nome,))
         resultados = cursor.fetchall()
 
         if resultados:
             with open("localizacoes_por_nome.json", "w", encoding="utf-8") as f:
-                json.dump([dict(zip([col[0] for col in cursor.description], row)) for row in resultados], f, indent=4, ensure_ascii=False)
+                json.dump([dict(zip([col[0] for col in cursor.description], row)) for row in resultados], f, indent=4,
+                          ensure_ascii=False)
             print("Resultados exportados para 'localizacoes_por_nome.json'.\n")
         else:
             print("Nenhum resultado encontrado.\n")
     except Exception as error:
-        print(f"Erro ao buscar localizações: {error}")
+        print(f"Erro ao buscar localizações: {error}\n")
 
 
 def buscar_evento_por_id():
     try:
-        evento_id = int(input("Digite o ID do evento (1 a 3): "))
+        evento_id = int(input("Digite o ID do evento (1 a 5): "))
         script = "SELECT * FROM T_SOS_EVENTOS WHERE ID_EVENTO = :1"
         cursor.execute(script, (evento_id,))
         resultados = cursor.fetchall()
 
         if resultados:
             with open("eventos_filtrados.json", "w", encoding="utf-8") as f:
-                json.dump([dict(zip([col[0] for col in cursor.description], row)) for row in resultados], f, indent=4, ensure_ascii=False)
+                json.dump([dict(zip([col[0] for col in cursor.description], row)) for row in resultados], f, indent=4,
+                          ensure_ascii=False)
             print("Resultados exportados para 'eventos_filtrados.json'.\n")
         else:
             print("Nenhum resultado encontrado.\n")
     except Exception as error:
-        print(f"Erro ao buscar eventos: {error}")
+        print(f"Erro ao buscar eventos: {error}\n")
+
 
 def buscar_sms_por_data():
     try:
-        data = input("Digite a data de envio (formato: YYYY-MM-DD): ")
+        data = input("Digite a data de envio (formato: YYYY-MM-DD): ").strip()
         data_formatada = datetime.datetime.strptime(data, "%Y-%m-%d").date()
 
-        script = "SELECT * FROM T_SOS_SMS_ENVIADO WHERE TRUNC(DATA_ENVIO) = :1"
+        script = "SELECT * FROM T_SOS_SMS WHERE TRUNC(DATA_ENVIO) = :1"
         cursor.execute(script, (data_formatada,))
         resultados = cursor.fetchall()
 
@@ -177,10 +182,8 @@ def buscar_sms_por_data():
             for row in resultados:
                 item = dict(zip(colunas, row))
                 # Converte o campo DATA_ENVIO para string
-                if 'DATA_ENVIO' in item and isinstance(item['DATA_ENVIO'], datetime.datetime):
+                if 'DATA_ENVIO' in item and isinstance(item['DATA_ENVIO'], (datetime.datetime, datetime.date)):
                     item['DATA_ENVIO'] = item['DATA_ENVIO'].strftime("%Y-%m-%d")
-                elif 'DATA_ENVIO' in item and isinstance(item['DATA_ENVIO'], datetime.date):
-                    item['DATA_ENVIO'] = item['DATA_ENVIO'].isoformat()
                 dados_formatados.append(item)
 
             with open("sms_por_data.json", "w", encoding="utf-8") as f:
@@ -191,9 +194,10 @@ def buscar_sms_por_data():
             print("Nenhum SMS enviado nesta data.\n")
 
     except ValueError:
-        print("Formato de data inválido! Use o formato YYYY-MM-DD.")
+        print("Formato de data inválido! Use o formato YYYY-MM-DD.\n")
     except Exception as error:
-        print(f"Erro ao buscar SMS: {error}")
+        print(f"Erro ao buscar SMS: {error}\n")
+
 
 def alterar_localizacao():
     try:
@@ -257,6 +261,8 @@ def excluir_localizacao():
     except Exception as error:
         print(f"Alerta na transação do BD: {error}")
 
+
+# Conexão com banco de dados Oracle
 # Menu principal
 login = input("Usuário..: ")
 senha = input("Senha....: ")
@@ -281,7 +287,7 @@ try:
         print("9 - Buscar localizações por nome.")
         print("10 - Buscar eventos por ID.")
         print("11 - Buscar SMS por data.")
-        print("12 - Sair.")
+        print("0 - Sair.")
 
         escolha = int(input("Escolha uma opção: "))
 
@@ -309,7 +315,7 @@ try:
                 buscar_evento_por_id()
             case 11:
                 buscar_sms_por_data()
-            case 12:
+            case 0:
                 print('Programa finalizado.')
                 conn.close()
                 break
@@ -317,4 +323,3 @@ try:
                 print('Opção inválida.')
 except Exception as erro:
     print(f"Erro: {erro}")
-

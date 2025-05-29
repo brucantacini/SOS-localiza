@@ -1,7 +1,9 @@
 [
     {
-        "ID_SMS": 3,
-        "MENSAGEM": "Tempestade forte atingindo a Estação Vila Verde. Árvores caídas.",
-        "DATA_ENVIO": "2025-05-26"
+        "ID_SMS": 1,
+        "MENSAGEM": "Estou em uma área de alagamento, preciso de ajuda! Rua das Flores, 120.",
+        "DATA_ENVIO": "2025-05-29",
+        "ID_LOCAL": 1,
+        "ID_EVENTO": 1
     }
 ]

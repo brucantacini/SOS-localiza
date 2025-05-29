@@ -1,9 +1,9 @@
 [
     {
-        "ID_LOCAL": 6,
-        "NOME_LOCAL": "Casa",
-        "RUA_LOCAL": "Rua antonio jose",
-        "NUMERO_LOCAL": 10,
-        "CEP_LOCAL": null
+        "ID_LOCAL": 1,
+        "NOME_LOCAL": "Escola Municipal Sol Nascente",
+        "RUA_LOCAL": "Rua das Flores",
+        "NUMERO_LOCAL": 120,
+        "CEP_LOCAL": 4567000
     }
 ]

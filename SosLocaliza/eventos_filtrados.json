@@ -2,9 +2,9 @@
     {
         "ID_EVENTO": 1,
         "NOME_EVENTO": "Inundação",
-        "DESCRICAO": "Acúmulo de água por escoamento insuficiente, agravado por desmatamento e lixo urbano.",
-        "TXT_PREVENCAO": "Evite jogar lixo na rua, mantenha calhas limpas e proteja documentos em local seguro.",
-        "TXT_DURANTE": "Evite sair, procure abrigo em locais elevados, não tente atravessar alagamentos.",
-        "TXT_APOS": "Espere a água baixar, desinfete objetos, e descarte alimentos contaminados."
+        "DESCRICAO": "Acúmulo de água por escoamento insuficiente.",
+        "TXT_PREVENCAO": "Evite jogar lixo na rua e mantenha calhas limpas.",
+        "TXT_DURANTE": "Não tente atravessar áreas alagadas.",
+        "TXT_APOS": "Desinfete objetos e verifique instalações elétricas."
     }
 ]
